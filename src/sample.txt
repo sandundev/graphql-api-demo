@@ -1,0 +1,51 @@
+{
+  promotions {
+    promotionName
+    regions {
+      regionCode
+      termsOfSales {
+        tosId
+        countries {
+          countryName
+          pricing {
+            retailPrice
+            indicativeRetailPrice
+            discountPercentage
+          }
+        }
+      }
+    }
+  }
+}
+
+------------
+
+
+
+
+
+
+
+
+query {
+  promotions {
+    promotionId
+    promotionName
+    startDate
+    endDate
+    regions {
+      regionCode
+      termsOfSales {
+        tosId
+        countries {
+          countryName
+          pricing {
+            retailPrice
+            indicativeRetailPrice
+            discountPercentage
+          }
+        }
+      }
+    }
+  }
+}
