@@ -1,51 +1,104 @@
+1. --- basic promotion query --
+
 {
-  promotions {
-    promotionName
-    regions {
-      regionCode
-      termsOfSales {
-        tosId
-        countries {
-          countryName
-          pricing {
-            retailPrice
-            indicativeRetailPrice
-            discountPercentage
-          }
-        }
-      }
-    }
-  }
-}
-
-------------
-
-
-
-
-
-
-
-
-query {
   promotions {
     promotionId
     promotionName
     startDate
     endDate
-    regions {
-      regionCode
-      termsOfSales {
-        tosId
+    termsOfSales {
+      tosId
+      regions {
+        regionCode
         countries {
           countryName
+          countryCode
+          startDate
+          endDate
           pricing {
             retailPrice
             indicativeRetailPrice
             discountPercentage
+            wholesalePrice
+            priceAfterDiscount
           }
         }
       }
     }
   }
 }
+
+2.-----query with filter params-------
+
+query GetPromotions($promotionName: String, $regionCode: String) {
+  promotions(promotionName: $promotionName, regionCode: $regionCode) {
+    promotionId
+    promotionName
+    startDate
+    endDate
+    termsOfSales {
+      tosId
+      regions {
+        regionCode
+        countries {
+          countryName
+          countryCode
+          startDate
+          endDate
+          pricing {
+            retailPrice
+            indicativeRetailPrice
+            discountPercentage
+            wholesalePrice
+            priceAfterDiscount
+          }
+        }
+      }
+    }
+  }
+}
+
+params --->
+{
+  "promotionName": "Updated Summer Sale",
+  "regionCode": "SIEE"
+}
+
+
+
+3. add new Promotion
+
+mutation AddPromotion {
+  addPromotion(
+    promotionId: "promo124",
+    promotionName: "Winter Sale",
+    startDate: "2023-12-01T00:00:00Z",
+    endDate: "2023-12-31T23:59:59Z"
+  ) {
+    promotionId
+    promotionName
+    startDate
+    endDate
+  }
+}
+
+4. update a Promotion
+
+mutation UpdatePromotion {
+  updatePromotion(
+    promotionId: "promo123",
+    promotionName: "Updated Summer Sale"
+  ) {
+    promotionId
+    promotionName
+    startDate
+    endDate
+  }
+}
+
+5. Delete a Promotion
+
+mutation DeletePromotion {
+  deletePromotion(promotionId: "promo123")
+}
+

@@ -1,3 +1,73 @@
 {
-  "promotions": []
+  "promotions": [
+    {
+      "promotionId": "promo123",
+      "promotionName": "Updated Summer Sale X",
+      "startDate": "2023-06-01T00:00:00Z",
+      "endDate": "2023-06-30T23:59:59Z",
+      "termsOfSales": [
+        {
+          "tosId": "tos123",
+          "regions": [
+            {
+              "regionCode": "SIEE",
+              "countries": [
+                {
+                  "countryName": "France",
+                  "countryCode": "FR",
+                  "startDate": "2023-06-01T00:00:00Z",
+                  "endDate": "2023-06-30T23:59:59Z",
+                  "pricing": {
+                    "retailPrice": 59.99,
+                    "indicativeRetailPrice": 62.99,
+                    "discountPercentage": 20,
+                    "wholesalePrice": 40,
+                    "priceAfterDiscount": 47.99
+                  }
+                },
+                {
+                  "countryName": "Germany",
+                  "countryCode": "DE",
+                  "startDate": "2023-06-05T00:00:00Z",
+                  "endDate": "2023-06-25T23:59:59Z",
+                  "pricing": {
+                    "retailPrice": 59.99,
+                    "indicativeRetailPrice": 61.99,
+                    "discountPercentage": 15,
+                    "wholesalePrice": 42,
+                    "priceAfterDiscount": 50.99
+                  }
+                }
+              ]
+            },
+            {
+              "regionCode": "SIEA",
+              "countries": [
+                {
+                  "countryName": "United States",
+                  "countryCode": "US",
+                  "startDate": "2023-06-10T00:00:00Z",
+                  "endDate": "2023-06-20T23:59:59Z",
+                  "pricing": {
+                    "retailPrice": 59.99,
+                    "indicativeRetailPrice": 64.99,
+                    "discountPercentage": 25,
+                    "wholesalePrice": 38,
+                    "priceAfterDiscount": 44.99
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "promotionId": "promo124",
+      "promotionName": "Winter Sale",
+      "startDate": "2023-12-01T00:00:00Z",
+      "endDate": "2023-12-31T23:59:59Z",
+      "termsOfSales": []
+    }
+  ]
 }

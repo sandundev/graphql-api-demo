@@ -1,16 +1,16 @@
-import { GraphQLObjectType, GraphQLSchema, GraphQLFloat, GraphQLString, GraphQLList, GraphQLNonNull } from 'graphql';
+import {GraphQLObjectType, GraphQLSchema, GraphQLFloat, GraphQLString, GraphQLList, GraphQLNonNull} from 'graphql';
 import data from './data.json';
-import { Promotion, TermsOfSales, Region, Country, Pricing } from './types';
+import {Promotion, TermsOfSales, Region, Country, Pricing} from './types';
 import fs from 'fs';
 // Pricing Type
 const pricingType = new GraphQLObjectType<Pricing>({
     name: 'Pricing',
     fields: {
-        retailPrice: { type: GraphQLFloat },
-        indicativeRetailPrice: { type: GraphQLFloat },
-        discountPercentage: { type: GraphQLFloat },
-        wholesalePrice: { type: GraphQLFloat },
-        priceAfterDiscount: { type: GraphQLFloat }
+        retailPrice: {type: GraphQLFloat},
+        indicativeRetailPrice: {type: GraphQLFloat},
+        discountPercentage: {type: GraphQLFloat},
+        wholesalePrice: {type: GraphQLFloat},
+        priceAfterDiscount: {type: GraphQLFloat}
     }
 });
 
@@ -18,11 +18,11 @@ const pricingType = new GraphQLObjectType<Pricing>({
 const countryType = new GraphQLObjectType<Country>({
     name: 'Country',
     fields: {
-        countryName: { type: GraphQLString },
-        countryCode: { type: GraphQLString },
-        startDate: { type: GraphQLString },
-        endDate: { type: GraphQLString },
-        pricing: { type: pricingType }
+        countryName: {type: GraphQLString},
+        countryCode: {type: GraphQLString},
+        startDate: {type: GraphQLString},
+        endDate: {type: GraphQLString},
+        pricing: {type: pricingType}
     }
 });
 
@@ -30,8 +30,8 @@ const countryType = new GraphQLObjectType<Country>({
 const regionType = new GraphQLObjectType<Region>({
     name: 'Region',
     fields: {
-        regionCode: { type: GraphQLString },
-        countries: { type: new GraphQLList(countryType) }
+        regionCode: {type: GraphQLString},
+        countries: {type: new GraphQLList(countryType)}
     }
 });
 
@@ -39,8 +39,8 @@ const regionType = new GraphQLObjectType<Region>({
 const termsOfSalesType = new GraphQLObjectType<TermsOfSales>({
     name: 'TermsOfSales',
     fields: {
-        tosId: { type: GraphQLString },
-        regions: { type: new GraphQLList(regionType) }
+        tosId: {type: GraphQLString},
+        regions: {type: new GraphQLList(regionType)}
     }
 });
 
@@ -48,28 +48,69 @@ const termsOfSalesType = new GraphQLObjectType<TermsOfSales>({
 const promotionType = new GraphQLObjectType<Promotion>({
     name: 'Promotion',
     fields: {
-        promotionId: { type: GraphQLString },
-        promotionName: { type: GraphQLString },
-        startDate: { type: GraphQLString },
-        endDate: { type: GraphQLString },
-        termsOfSales: { type: new GraphQLList(termsOfSalesType) }
+        promotionId: {type: GraphQLString},
+        promotionName: {type: GraphQLString},
+        startDate: {type: GraphQLString},
+        endDate: {type: GraphQLString},
+        termsOfSales: {type: new GraphQLList(termsOfSalesType)}
     }
 });
+
+// query Type
+const queryType = new GraphQLObjectType({
+    name: 'Query',
+    fields: {
+        promotions: {
+            type: new GraphQLList(promotionType),
+            args: {
+                promotionName: {type: GraphQLString}, // Made optional
+                regionCode: {type: GraphQLString}     // Made optional
+            },
+            resolve: (_, args, context) => {
+                let promotionsData: Promotion[] = JSON.parse(JSON.stringify(data.promotions));
+                if (args.promotionName) {
+                    promotionsData = promotionsData.filter(promotion => promotion.promotionName === args.promotionName);
+                }
+                if (args.regionCode) {
+                    promotionsData = promotionsData.map(promotion => ({
+                        ...promotion,
+                        termsOfSales: promotion.termsOfSales.map(tos => ({
+                            ...tos,
+                            regions: tos.regions.filter(region => region.regionCode === args.regionCode)
+                        }))
+                    }));
+                }
+                if (context && context.userType === 'PARTNER_USER') {
+                    promotionsData.forEach(promotion => {
+                        promotion.termsOfSales.forEach(tos => {
+                            tos.regions.forEach(region => {
+                                region.countries.forEach(country => {
+                                    delete country.pricing.indicativeRetailPrice;
+                                });
+                            });
+                        });
+                    });
+                }
+                return promotionsData;
+            }
+        }
+    }
+});
+
 
 // Mutation Type
 const mutationType = new GraphQLObjectType({
     name: 'Mutation',
     fields: {
-
         addPromotion: {
             type: promotionType,
             args: {
-                promotionId: { type: new GraphQLNonNull(GraphQLString) },
-                promotionName: { type: new GraphQLNonNull(GraphQLString) },
-                startDate: { type: new GraphQLNonNull(GraphQLString) },
-                endDate: { type: new GraphQLNonNull(GraphQLString) }
+                promotionId: {type: new GraphQLNonNull(GraphQLString)},
+                promotionName: {type: new GraphQLNonNull(GraphQLString)},
+                startDate: {type: new GraphQLNonNull(GraphQLString)},
+                endDate: {type: new GraphQLNonNull(GraphQLString)}
             },
-            resolve: (_, { promotionId, promotionName, startDate, endDate }) => {
+            resolve: (_, {promotionId, promotionName, startDate, endDate}) => {
                 const newPromotion: Promotion = {
                     promotionId,
                     promotionName,
@@ -85,12 +126,12 @@ const mutationType = new GraphQLObjectType({
         updatePromotion: {
             type: promotionType,
             args: {
-                promotionId: { type: new GraphQLNonNull(GraphQLString) },
-                promotionName: { type: GraphQLString },
-                startDate: { type: GraphQLString },
-                endDate: { type: GraphQLString }
+                promotionId: {type: new GraphQLNonNull(GraphQLString)},
+                promotionName: {type: GraphQLString},
+                startDate: {type: GraphQLString},
+                endDate: {type: GraphQLString}
             },
-            resolve: (_, { promotionId, promotionName, startDate, endDate }) => {
+            resolve: (_, {promotionId, promotionName, startDate, endDate}) => {
                 const promotion = data.promotions.find(p => p.promotionId === promotionId);
                 if (promotion) {
                     if (promotionName) promotion.promotionName = promotionName;
@@ -104,9 +145,9 @@ const mutationType = new GraphQLObjectType({
         deletePromotion: {
             type: GraphQLString,
             args: {
-                promotionId: { type: new GraphQLNonNull(GraphQLString) }
+                promotionId: {type: new GraphQLNonNull(GraphQLString)}
             },
-            resolve: (_, { promotionId }) => {
+            resolve: (_, {promotionId}) => {
                 const index = data.promotions.findIndex(p => p.promotionId === promotionId);
                 if (index > -1) {
                     data.promotions.splice(index, 1);
@@ -114,33 +155,6 @@ const mutationType = new GraphQLObjectType({
                     return `Promotion with ID ${promotionId} deleted.`;
                 }
                 return `Promotion with ID ${promotionId} not found.`;
-            }
-        }
-    }
-});
-
-const queryType = new GraphQLObjectType({
-    name: 'Query',
-    fields: {
-        promotions: {
-            type: new GraphQLList(promotionType),
-            args: {
-                promotionName: { type: GraphQLString },
-                regionCode: { type: GraphQLString }
-            },
-            resolve: (_, args) => {
-                let promotionsData: Promotion[] = JSON.parse(JSON.stringify(data.promotions));
-                if (args.promotionName) {
-                    promotionsData = promotionsData.filter(promotion => promotion.promotionName === args.promotionName);
-                }
-                if (args.regionCode) {
-                    promotionsData.forEach(promotion => {
-                        promotion.termsOfSales.forEach(tos => {
-                            tos.regions = tos.regions.filter(region => region.regionCode === args.regionCode);
-                        });
-                    });
-                }
-                return promotionsData;
             }
         }
     }
