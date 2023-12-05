@@ -1,3 +1,7 @@
+GraphQL Demo App
+==========================
+
+
 // 1. --- basic promotion query --
 {
 promotions {
